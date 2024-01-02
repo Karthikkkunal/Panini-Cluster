@@ -1,93 +1,79 @@
-# Panini Cluster
+# PANINI CLUSTER
+
+Building upon the [ALBERT training tutorial](https://github.com/learning-at-home/hivemind/tree/master/examples/albert) in the [Hivemind](https://github.com/learning-at-home/hivemind) GitHub repository.
+
+## Prerequisites
+
+- Download the Project 
+  ```
+  wget https://code.swecha.org/swecha-sites/panini-cluster.git
+  ```
+
+- (Optional, recommended) Create a virtual environment and activate it
+
+  ``` sh
+  python3 -m venv ~/panini-venv
+  source ~/panini-venv/bin/activate
+  ```
+
+- Install the requirements using `requirements.txt`
+  ```
+  pip3 install -r requirements.txt
+  ```
+
+- Preprocess the data
+  ```
+  python3 tokenize_wikitext103.py
+  ```
 
 
+## Running an experiment
 
-## Getting started
+There are two kinds of nodes you can run.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+1. Training Monitor: Tracks the training progress and provides a multiaddress to allow other peers to join the network. At least one training monitor must be up at all times. You can have multiple training monitors running at any given time.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+2. Trainer nodes: Connects to an existing node in the network and contributes to model training. Most of the nodes in the P2P network must be trainer nodes.
 
-## Add your files
+### First peer in the network is a training monitor
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+The `run_training_monitor.py` file starts a *Training monitor* that keeps track of the training process and allows other peers to connect. Preferably, the training monitor should be running on a machine with a public IP address, so that other peers can easily discover the first peer. Ensure that WandB has been set up before starting the training monitor (if you're new to WandB, go through the [WandB Quickstart](https://docs.wandb.ai/quickstart) to understand how to set it up).
 
+Run the training monitor using the following command.
+
+``` sh
+python3 run_training_monitor.py --wandb_project 2023-12-29-albert --host_maddrs /ip4/0.0.0.0/tcp/31337 --identity_path ./identity.key
 ```
-cd existing_repo
-git remote add origin https://code.swecha.org/Cherukupalle_Naveen/panini-cluster.git
-git branch -M main
-git push -uf origin main
+
+This command runs the training monitor on the TCP port 31337 and read the identity from `identity.key` (if `identity.key` doesn't exist, then this command creates it). All the training logs are saved in the project named *2023-12-29-albert*.
+
+### Run a trainer node
+
+The `run_trainer.py` starts a trainer node, which start the actual training process. You can customize the training process by providing argument to the command. To see the full list of commands, run `python3 run_trainer.py --help`. The following are some useful arguments
+
+- `--initial_peers MULTIADDRESS`: Specify which peers in the network you wish to connect to. Typically, you would specify the multiaddress of a training monitor (see example below). However, you can specify the multiaddress of any node in the P2P network.
+
+- `--per_device_train_batch_size NUM`: Number of samples that are processed by the trainer node in a single batch. Set `NUM` to a small number if the machine doesn't have enough comp0ute power.
+
+- `--use_cpu BOOL`: Determines whether to use CPU or not. Set `BOOL` to `True` if CPU training is desired. Also use `--no-fp16` if CPU training is desired, to disable 16-bit floating point training.
+
+- `--no_fp16`: Disables 16-bit floating point training.
+
+For example, run the following script to start a CPU-only training node that connects to a peer whose multiaddress is `/ip4/65.108.151.120/tcp/31337/p2p/QmRY4WjaPWw2q1x9Ciqc4efXqGfPhrugUc1FMCtMBPY7VB`.
+``` sh
+python3 run_trainer.py --initial_peers /ip4/65.108.151.120/tcp/31337/p2p/QmRY4WjaPWw2q1x9Ciqc4efXqGfPhrugUc1FMCtMBPY7VB --use_cpu True --no_fp16
 ```
 
-## Integrate with your tools
+To run a training node with GPU, you can simply omit the flags at the end and run the following.
 
-- [ ] [Set up project integrations](https://code.swecha.org/Cherukupalle_Naveen/panini-cluster/-/settings/integrations)
+``` sh
+python3 run_trainer.py --initial_peers /ip4/65.108.151.120/tcp/31337/p2p/QmRY4WjaPWw2q1x9Ciqc4efXqGfPhrugUc1FMCtMBPY7VB
+```
 
-## Collaborate with your team
+- If you are not using WandB, then choose option `3. Don't visualize my results` when prompted and press `Enter`.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+    ![Screenshot_from_2023-12-28_18-55-05](/uploads/7dfd13f26fdcde297822a56c8c22c496/Screenshot_from_2023-12-28_18-55-05.png)
 
-## Test and Deploy
+- Working Model Output:
 
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+    ![Screenshot_from_2023-12-28_18-57-15](/uploads/98f28d5697b5f3a83de6fe8738cbe1d7/Screenshot_from_2023-12-28_18-57-15.png)
