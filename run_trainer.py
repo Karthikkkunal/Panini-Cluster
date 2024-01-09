@@ -5,6 +5,7 @@ import pickle
 import sys
 from dataclasses import asdict
 from pathlib import Path
+import argparse
 
 import torch
 import transformers
@@ -33,6 +34,18 @@ from arguments import (
 
 use_hivemind_log_handler("in_root_logger")
 logger = get_logger(__name__)
+
+
+
+import collections 
+import sys
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    from collections.abc import MutableSet
+    collections.MutableSet = collections.abc.MutableSet
+else: 
+    from collections import MutableSet
+
+
 
 
 def setup_transformers_logging(process_rank: int):
@@ -211,23 +224,28 @@ def main():
     model = get_model(training_args, config, tokenizer)
     model.to(training_args.device)
 
-    tokenized_datasets = load_from_disk(Path(dataset_args.dataset_path))
+    tokenized_datasets = load_from_disk(str(Path(dataset_args.dataset_path)))
     # This data collator will take care of randomly masking the tokens.
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer)
 
     validators, local_public_key = utils.make_validators(collaboration_args.run_id)
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--initial_peers', nargs='+', help='Initial peer multiaddress')
+    args = parser.parse_args()
+    print(args)
+
     dht = DHT(
         start=True,
-        initial_peers=collaboration_args.initial_peers,
-        client_mode=collaboration_args.client_mode,
-        record_validators=validators,
-        use_ipfs=collaboration_args.use_ipfs,
-        host_maddrs=collaboration_args.host_maddrs,
-        announce_maddrs=collaboration_args.announce_maddrs,
-        identity_path=collaboration_args.identity_path,
+        initial_peers=args.initial_peers if args.initial_peers else None,
+#        client_mode=collaboration_args.client_mode,
+#        record_validators=validators,
+#        use_ipfs=collaboration_args.use_ipfs,
+#        host_maddrs=collaboration_args.host_maddrs,
+#        announce_maddrs=collaboration_args.announce_maddrs,
+#        identity_path=collaboration_args.identity_path,
     )
-    log_visible_maddrs(dht.get_visible_maddrs(), only_p2p=collaboration_args.use_ipfs)
+#    log_visible_maddrs(dht.get_visible_maddrs(), only_p2p=collaboration_args.use_ipfs)
 
     total_batch_size_per_step = 1
     #if torch.cuda.device_count() != 0:

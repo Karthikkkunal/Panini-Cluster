@@ -1,0 +1,53 @@
+{
+    "os": "Linux-6.2.0-39-generic-x86_64-with-glibc2.35",
+    "python": "3.10.12",
+    "heartbeatAt": "2024-01-07T07:09:10.542006",
+    "startedAt": "2024-01-07T07:09:10.407693",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--initial_peers",
+        "/ip4/65.108.151.120/tcp/31337/p2p/QmRY4WjaPWw2q1x9Ciqc4efXqGfPhrugUc1FMCtMBPY7VB"
+    ],
+    "state": "running",
+    "program": "/home/swecha/panini-cluster/run_trainer.py",
+    "codePathLocal": "run_trainer.py",
+    "codePath": "run_trainer.py",
+    "git": {
+        "remote": "https://code.swecha.org/Cherukupalle_Naveen/panini-cluster",
+        "commit": "30949e4eae6b4f02da6a5bfe9aad47852bccae5b"
+    },
+    "email": null,
+    "root": "/home/swecha/panini-cluster",
+    "host": "swecha-ThinkCentre-M72e",
+    "username": "swecha",
+    "executable": "/usr/bin/python3",
+    "cpu_count": 2,
+    "cpu_count_logical": 2,
+    "cpu_freq": {
+        "current": 2468.6445000000003,
+        "min": 1600.0,
+        "max": 2900.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2893.524,
+            "min": 1600.0,
+            "max": 2900.0
+        },
+        {
+            "current": 2893.559,
+            "min": 1600.0,
+            "max": 2900.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 456.8854446411133,
+            "used": 40.294578552246094
+        }
+    },
+    "memory": {
+        "total": 5.6069488525390625
+    }
+}
