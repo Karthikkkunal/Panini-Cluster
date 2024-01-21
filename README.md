@@ -34,7 +34,7 @@ python3 -m petals.cli.run_server bigscience/bloom-560m --initial_peers /ip4/65.1
 
 
 
-##Resources
+## Resources
 Resources:
 https://github.com/bigscience-workshop/petals
 https://github.com/petals-infra/chat.petals.dev
