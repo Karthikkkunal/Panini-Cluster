@@ -30,7 +30,7 @@ There are two kinds of nodes you can run.
 
 ### To join your device as a peer into the inferencing network,
 ```
-python3 -m petals.cli.run_server bigscience/bloom-560m --initial_peers /ip4/65.108.151.120/tcp/31337/p2p/QmbPdbE4bsjPGEV7KDepxPFBqmRtQuK479LVi8qvB8seL1 --torch_dtype float32 --num_blocks 10
+python3 -m petals.cli.run_server bigscience/bloom-560m --initial_peers /ip4/65.108.151.120/tcp/31337/p2p/QmbPdbE4bsjPGEV7KDepxPFBqmRtQuK479LVi8qvB8seL1 --torch_dtype auto --num_blocks 11 --public_name XYZ
 ```
 
 
